@@ -1,0 +1,23 @@
+.string-1 {
+	stroke: var(--string-1, #dadada) !important;
+}
+
+.string-2 {
+	stroke: var(--string-2, #dadada) !important;
+}
+
+.string-3 {
+	stroke: var(--string-3, #dadada) !important;
+}
+
+.string-4 {
+	stroke: var(--string-4, #dadada) !important;
+}
+
+.string-5 {
+	stroke: var(--string-5, #dadada) !important;
+}
+
+.string-6 {
+	stroke: var(--string-6, #dadada) !important;
+}

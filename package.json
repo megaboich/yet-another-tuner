@@ -1,0 +1,24 @@
+{
+  "name": "yet-another-tuner",
+  "version": "1.0.0",
+  "description": "A simple, web-based guitar tuner built with modern JavaScript standards. It includes minimal core functionality for tuning, along with some extra features like a real-time spectrogram, guitar headstock visualization, and a live frequency vs. time plot (waterfall chart).",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "browser-sync start --server --files \"**/*\" --no-open --port 8091"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/css": "^0.5.0",
+    "@eslint/js": "^9.23.0",
+    "@stylistic/eslint-plugin": "^4.2.0",
+    "browser-sync": "^3.0.3",
+    "eslint": "^9.23.0",
+    "eslint-plugin-sonarjs": "^3.0.2",
+    "globals": "^16.0.0",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.27.0"
+  }
+}
