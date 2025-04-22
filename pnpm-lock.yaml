@@ -17,9 +17,15 @@ importers:
       '@stylistic/eslint-plugin':
         specifier: ^4.2.0
         version: 4.2.0(eslint@9.23.0)(typescript@5.8.2)
+      aubiojs:
+        specifier: ^0.2.1
+        version: 0.2.1
       browser-sync:
         specifier: ^3.0.3
         version: 3.0.3
+      color2k:
+        specifier: ^2.0.3
+        version: 2.0.3
       eslint:
         specifier: ^9.23.0
         version: 9.23.0
@@ -247,6 +253,9 @@ packages:
   async@2.6.4:
     resolution: {integrity: sha512-mzo5dfJYwAn29PeiJ0zvwTo04zj8HDJj0Mn8TD7sno7q12prdbnasKJHhkm2c1LgrhlJ0teaea8860oxi51mGA==, tarball: https://artifact.devsnc.com/repository/npm-all/async/-/async-2.6.4.tgz}
 
+  aubiojs@0.2.1:
+    resolution: {integrity: sha512-lTMm5j/UMGlCvmZlBfBe9KM+tMdvnxm93fwaMugcPak/zUJfFMtkXf5azC4gG/V1FWXGmh1ejsa5sdm+Nlxs8w==, tarball: https://artifact.devsnc.com/repository/npm-all/aubiojs/-/aubiojs-0.2.1.tgz}
+
   available-typed-arrays@1.0.7:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==, tarball: https://artifact.devsnc.com/repository/npm-all/available-typed-arrays/-/available-typed-arrays-1.0.7.tgz}
     engines: {node: '>= 0.4'}
@@ -332,6 +341,9 @@ packages:
 
   color-name@1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==, tarball: https://artifact.devsnc.com/repository/npm-all/color-name/-/color-name-1.1.4.tgz}
+
+  color2k@2.0.3:
+    resolution: {integrity: sha512-zW190nQTIoXcGCaU08DvVNFTmQhUpnJfVuAKfWqUQkflXKpaDdpaYoM0iluLS9lgJNHyBF58KKA2FBEwkD7wog==, tarball: https://artifact.devsnc.com/repository/npm-all/color2k/-/color2k-2.0.3.tgz}
 
   commander@2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==, tarball: https://artifact.devsnc.com/repository/npm-all/commander/-/commander-2.20.3.tgz}
@@ -1647,6 +1659,8 @@ snapshots:
     dependencies:
       lodash: 4.17.21
 
+  aubiojs@0.2.1: {}
+
   available-typed-arrays@1.0.7:
     dependencies:
       possible-typed-array-names: 1.1.0
@@ -1781,6 +1795,8 @@ snapshots:
       color-name: 1.1.4
 
   color-name@1.1.4: {}
+
+  color2k@2.0.3: {}
 
   commander@2.20.3: {}
 

@@ -7,20 +7,36 @@
 	<title>Yet Another Tuner</title>
 	<link rel="stylesheet" href="./src/styles.css" />
 
-	<script src="./src/lib/aubio/aubio.min.js"></script>
+	<script type="importmap">
+		{
+			"imports": {
+				"color2k": "./src/lib/color2k/index.module.es.js"
+			}
+		}
+	</script>
+	<script type="module" src="src/main.js"></script>
 </head>
 
 <body>
-	<div id="welcome-banner">
+	<div id="welcome-screen" style="display: none;">
 		<div>
 			Press the button to start the tuner
 		</div>
-		<button id="start-button">Start tuner</button>
+		<br />
+		<button id=" start-button">Start tuner</button>
 	</div>
-	<div id="head-container">
+	<div id="tuning-screen" style="display: none;">
+		<div id="vis-info-panel">
+			<div id="note-stats">
+				<div id="note-name"><!--C#2--></div>
+				<div id="note-frequency"><!--261.63 Hz--></div>
+			</div>
+			<div id="tuning-indicator" style="visibility: hidden;"></div>
+			<div id="tuning-chart"></div>
+		</div>
+		<div id="vis-headstock">
+		</div>
 	</div>
-
-	<script type="module" src="src/index.js"></script>
 </body>
 
 </html>

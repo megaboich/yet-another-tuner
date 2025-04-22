@@ -7,11 +7,8 @@ import globals from 'globals';
 export default tslint.config(
 	{
 		ignores: [
-			'**/target/*',
-			'**/dist/*',
-			'**/.tectonic-output/*',
-			'**/node/*',
 			'**/node_modules/*',
+			'**/src/lib/*',
 		],
 	},
 	js.configs.recommended,
