@@ -1,8 +1,6 @@
 /**
- * Having to define own types for AudioWorkletProcessor and AudioWorkletNode
- * because the typescript definitions in the lib.dom.d.ts file are not
- * complete and do not match the actual implementation in the browser.
- * This is a workaround until the types are fixed in the lib.dom.d.ts file.
+ * Local AudioWorkletGlobalScope declarations are required because TypeScript's
+ * DOM library does not include the processor-side API.
  * See https://github.com/microsoft/TypeScript/issues/28308
  */
 
@@ -19,6 +17,8 @@ declare abstract class AudioWorkletProcessor {
 }
 
 declare function registerProcessor(name: string, processorCtor: typeof AudioWorkletProcessor): void;
+
+declare const sampleRate: number;
 
 interface AudioWorkletNodeOptions {
 	processorOptions?: any;

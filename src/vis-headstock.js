@@ -1,74 +1,84 @@
-import { getScale } from 'color2k';
-import { getElement } from './helpers.js';
-import { configs } from './configs.js';
-
-const colorScale = getScale('#00ffff', '#a5de00', '#cebc00', '#ec9600', '#fa6c00', '#fa4100', '#f00000');
-let prevStringIndex = 0;
-
-/** @type {HTMLElement} */
-let headContainer;
+/** @import { Handedness, TunerAPIResponse, TuningTarget } from './types.js' */
 
 /**
- * Initialize the headstock visualization by loading the SVG and injecting it into the DOM.
+ * @param {HTMLElement} container
+ * @param {(stringIndex: number) => void} onSelect
  */
-export async function initHeadstockVisualization() {
-	try {
-		// Load headstock graphics
-		const headSvgResult = await fetch('./src/guitar-6-string-head-1.drawio.svg');
-		if (!headSvgResult.ok) throw new Error('Failed to load headstock SVG');
+export function createHeadstockVisualization(container, onSelect) {
+	const buttons = Array.from(container.querySelectorAll('button'));
+	/** @type {Map<HTMLButtonElement, () => void>} */
+	const selectHandlers = new Map();
+	for (const button of buttons) {
+		const handler = () => onSelect(Number(button.dataset.stringIndex));
+		button.addEventListener('click', handler);
+		selectHandlers.set(button, handler);
+	}
 
-		const headSvgText = await headSvgResult.text();
-		headContainer = getElement('#vis-headstock');
-		headContainer.innerHTML = headSvgText;
-	} catch (error) {
-		console.error('Error initializing headstock visualization:', error);
+	return {
+		/** @param {TuningTarget[]} targets */
+		renderTargets(targets) {
+			for (const button of buttons) {
+				const stringIndex = Number(button.dataset.stringIndex);
+				const target = targets[stringIndex];
+				if (!target) continue;
+				const strong = button.querySelector('strong');
+				const small = button.querySelector('small');
+				if (strong) strong.textContent = target.noteName;
+				if (small) small.textContent = target.frequency.toFixed(1);
+				button.setAttribute('aria-label', `String ${target.stringNumber}, ${target.noteName}${target.octave}`);
+			}
+		},
+
+		/** @param {Handedness} handedness */
+		setHandedness(handedness) {
+			const indexes = handedness === 'left' ? [0, 1, 2, 3, 4, 5] : [5, 4, 3, 2, 1, 0];
+			for (const stringIndex of indexes) {
+				const button = buttons.find(candidate => Number(candidate.dataset.stringIndex) === stringIndex);
+				if (button) container.appendChild(button);
+			}
+		},
+
+		/** @param {TunerAPIResponse} entry */
+		update(entry) {
+			if (entry.stringIndex === null) return;
+			clearActiveString(buttons);
+			const button = buttons.find(candidate => Number(candidate.dataset.stringIndex) === entry.stringIndex);
+			if (!button) return;
+			button.classList.add('is-active');
+			button.style.setProperty('--string-color', getTuningColor(entry.cents));
+		},
+
+		/** @param {number | null} stringIndex */
+		select(stringIndex) {
+			for (const button of buttons) {
+				const isSelected = Number(button.dataset.stringIndex) === stringIndex;
+				button.classList.toggle('is-selected', isSelected);
+				button.setAttribute('aria-pressed', String(isSelected));
+			}
+		},
+
+		clear() {
+			clearActiveString(buttons);
+		},
+
+		destroy() {
+			for (const [button, handler] of selectHandlers) button.removeEventListener('click', handler);
+			selectHandlers.clear();
+		},
+	};
+}
+
+/** @param {HTMLButtonElement[]} buttons */
+function clearActiveString(buttons) {
+	for (const button of buttons) {
+		button.classList.remove('is-active');
+		button.style.removeProperty('--string-color');
 	}
 }
 
-/**
- * Update the headstock visualization based on the tuner API response.
- * @param {TunerAPIResponse} entry - The latest tuning data.
- */
-export function updateHeadstockVisualization(entry) {
-	const guitarConfig = configs[0]; // TODO: Allow dynamic selection of guitar configuration
-	const { stringFreqs } = guitarConfig;
-
-	// Find the closest string index
-	const closestStringIndex = findClosestStringIndex(stringFreqs, entry.frequency);
-
-	// Calculate the color based on the cents offset
-	const color = colorScale(Math.abs(entry.cents) / 50);
-
-	// Update the CSS variable for the closest string
-	updateStringHighlight(closestStringIndex, color);
-}
-
-/**
- * Find the index of the closest string based on the frequency.
- * @param {number[]} stringFreqs - Array of string frequencies.
- * @param {number} frequency - The current frequency.
- * @returns {number} - The index of the closest string.
- */
-function findClosestStringIndex(stringFreqs, frequency) {
-	return stringFreqs.reduce((closestIndex, stringFreq, index) => {
-		const closestDiff = Math.abs(stringFreqs[closestIndex] - frequency);
-		const currentDiff = Math.abs(stringFreq - frequency);
-		return currentDiff < closestDiff ? index : closestIndex;
-	}, 0);
-}
-
-/**
- * Update the CSS variable to highlight the closest string and remove the previous highlight.
- * @param {number} closestStringIndex - The index of the closest string.
- * @param {string} color - The color to apply.
- */
-function updateStringHighlight(closestStringIndex, color) {
-	// Highlight the closest string
-	headContainer.style.setProperty(`--string-${closestStringIndex + 1}`, color);
-
-	// Remove the highlight from the previous string
-	if (prevStringIndex !== closestStringIndex) {
-		headContainer.style.removeProperty(`--string-${prevStringIndex + 1}`);
-		prevStringIndex = closestStringIndex;
-	}
+/** @param {number} cents @returns {string} */
+function getTuningColor(cents) {
+	if (Math.abs(cents) <= 3) return 'var(--good)';
+	if (Math.abs(cents) <= 15) return 'var(--warning)';
+	return 'var(--danger)';
 }

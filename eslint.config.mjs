@@ -8,7 +8,10 @@ export default tslint.config(
 	{
 		ignores: [
 			'**/node_modules/*',
-			'**/src/lib/*',
+			'**/dist/*',
+			'**/coverage/*',
+			'**/playwright-report/*',
+			'**/test-results/*',
 		],
 	},
 	js.configs.recommended,
@@ -60,6 +63,12 @@ export default tslint.config(
 			'sonarjs/todo-tag': 'off',
 			'sonarjs/cognitive-complexity': ['error', 20],
 			'sonarjs/no-empty-test-file': 'off',
+		},
+	},
+	{
+		files: ['**/tuner-pitch-processor.js'],
+		languageOptions: {
+			globals: globals.audioWorklet,
 		},
 	}
 );

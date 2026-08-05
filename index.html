@@ -1,42 +1,162 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+	<meta name="description" content="A fast, private guitar tuner that processes microphone audio on your device." />
+	<meta name="theme-color" content="#11100e" />
 	<title>Yet Another Tuner</title>
 	<link rel="stylesheet" href="./src/styles.css" />
-
-	<script type="importmap">
-		{
-			"imports": {
-				"color2k": "./src/lib/color2k/index.module.es.js"
-			}
-		}
-	</script>
-	<script type="module" src="src/main.js"></script>
+	<script type="module" src="./src/main.js"></script>
 </head>
 
-<body>
-	<div id="welcome-screen" style="display: none;">
-		<div>
-			Press the button to start the tuner
-		</div>
-		<br />
-		<button id=" start-button">Start tuner</button>
+<body data-app-state="idle">
+	<div class="app-shell">
+		<header class="app-header">
+			<a class="brand" href="./" aria-label="Yet Another Tuner home">
+				<span class="brand-mark" aria-hidden="true">440</span>
+				<span>
+					<span class="eyebrow">Precision guitar utility</span>
+					<span class="brand-name">Yet Another Tuner</span>
+				</span>
+			</a>
+			<div class="privacy-badge"><span aria-hidden="true"></span> Local audio only</div>
+			<button id="settings-button" class="icon-button" type="button" aria-haspopup="dialog" aria-controls="settings-dialog">Settings</button>
+		</header>
+
+		<main>
+			<section id="welcome-screen" class="welcome-panel panel" aria-labelledby="welcome-title">
+				<p id="welcome-tuning" class="eyebrow">Standard tuning · E A D G B E</p>
+				<h1 id="welcome-title">Find the note.<br /><em>Hold the line.</em></h1>
+				<p class="welcome-copy">A responsive tuner built for the space between a pluck and perfect pitch. No account, no upload, no stored audio.</p>
+				<div class="welcome-actions">
+					<button id="start-button" class="primary-button" type="button">
+						<span>Start listening</span>
+						<span aria-hidden="true">→</span>
+					</button>
+					<p id="tuner-status" class="welcome-status" role="status" aria-live="polite">Microphone access begins only when you press start.</p>
+				</div>
+			</section>
+
+			<section id="tuning-screen" class="tuner-layout" aria-label="Guitar tuner" hidden>
+				<h1 class="sr-only">Guitar tuner</h1>
+				<div class="tuner-toolbar">
+					<div id="signal-status" class="signal-status" role="status" aria-live="polite">
+						<span class="signal-dot" aria-hidden="true"></span>
+						<span id="signal-status-text">Listening · Play a string</span>
+					</div>
+					<button id="stop-button" class="quiet-button" type="button" disabled>Stop microphone</button>
+				</div>
+
+				<div class="instrument-grid">
+					<section id="vis-info-panel" class="meter-panel panel" aria-labelledby="meter-title">
+						<div class="meter-heading">
+							<div>
+								<p class="eyebrow">Detected target</p>
+								<h2 id="meter-title" class="sr-only">Pitch meter</h2>
+							</div>
+							<span id="tuning-direction" class="direction-label">Waiting</span>
+						</div>
+
+						<div id="note-stats" class="note-stats">
+							<div id="note-name" class="note-name">—</div>
+							<div class="pitch-details">
+								<span id="note-frequency">Play a string</span>
+								<span id="cents-value">0.0 cents</span>
+							</div>
+						</div>
+
+						<div id="tuning-indicator" class="tuning-indicator" aria-hidden="true">
+							<div class="meter-scale">
+								<span>−50</span><span>−25</span><span>0</span><span>+25</span><span>+50</span>
+							</div>
+							<div class="meter-track"><span class="meter-center"></span></div>
+							<div class="meter-needle"></div>
+						</div>
+
+						<div class="history-heading"><span>Pitch stability</span><span>±50 cents</span></div>
+						<div id="tuning-chart" class="tuning-chart"></div>
+					</section>
+
+					<aside class="strings-panel panel" aria-labelledby="strings-title">
+						<div class="strings-heading">
+							<div>
+								<p class="eyebrow">Target string</p>
+								<h2 id="strings-title">Standard</h2>
+							</div>
+							<button id="auto-mode-button" class="mode-button is-active" type="button" aria-pressed="true">Auto</button>
+						</div>
+						<div id="vis-headstock" class="string-selector" role="group" aria-label="Select a guitar string">
+							<button type="button" data-string-index="5" aria-label="String 6, low E"><span>6</span><strong>E</strong><small>82.4</small></button>
+							<button type="button" data-string-index="4" aria-label="String 5, A"><span>5</span><strong>A</strong><small>110</small></button>
+							<button type="button" data-string-index="3" aria-label="String 4, D"><span>4</span><strong>D</strong><small>146.8</small></button>
+							<button type="button" data-string-index="2" aria-label="String 3, G"><span>3</span><strong>G</strong><small>196</small></button>
+							<button type="button" data-string-index="1" aria-label="String 2, B"><span>2</span><strong>B</strong><small>246.9</small></button>
+							<button type="button" data-string-index="0" aria-label="String 1, high E"><span>1</span><strong>E</strong><small>329.6</small></button>
+						</div>
+						<p class="selector-help">Choose a string to lock the target in a noisy room. Select Auto to follow each open string.</p>
+					</aside>
+				</div>
+			</section>
+		</main>
+
+		<footer><span>Audio never leaves this device.</span><span id="footer-settings">A4 = 440 Hz</span></footer>
 	</div>
-	<div id="tuning-screen" style="display: none;">
-		<div id="vis-info-panel">
-			<div id="note-stats">
-				<div id="note-name"><!--C#2--></div>
-				<div id="note-frequency"><!--261.63 Hz--></div>
+
+	<dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title">
+		<form method="dialog" class="settings-card">
+			<div class="settings-header">
+				<div><p class="eyebrow">Configuration</p><h2 id="settings-title">Tuner settings</h2></div>
+				<button class="icon-button" value="close" aria-label="Close settings">Close</button>
 			</div>
-			<div id="tuning-indicator" style="visibility: hidden;"></div>
-			<div id="tuning-chart"></div>
-		</div>
-		<div id="vis-headstock">
-		</div>
-	</div>
+			<div class="settings-grid">
+				<label> Tuning
+					<select id="preset-select">
+						<option value="standard">Standard</option><option value="drop-d">Drop D</option>
+						<option value="dadgad">DADGAD</option><option value="open-g">Open G</option>
+						<option value="open-d">Open D</option><option value="half-step-down">Half step down</option>
+						<option value="full-step-down">Full step down</option>
+						<option value="custom">Custom</option>
+					</select>
+				</label>
+				<label><span id="reference-label">A4 reference</span> <output id="reference-output" for="reference-input">440 Hz</output>
+					<input id="reference-input" aria-labelledby="reference-label reference-output" type="range" min="432" max="446" value="440" />
+				</label>
+				<label>Capo position
+					<select id="capo-select"></select>
+				</label>
+				<label>Microphone
+					<select id="device-select"><option value="">System default</option></select>
+				</label>
+				<label>Theme
+					<select id="theme-select"><option value="system">System</option><option value="dark">Dark</option><option value="light">Light</option></select>
+				</label>
+				<label>String orientation
+					<select id="handedness-select"><option value="right">Right-handed</option><option value="left">Left-handed</option></select>
+				</label>
+			</div>
+			<fieldset id="custom-tuning-fields" class="settings-section" hidden>
+				<legend>Custom open strings</legend>
+				<p>Choose six unique notes from highest string 1 to lowest string 6.</p>
+				<div id="custom-note-selects" class="custom-note-grid"></div>
+				<p id="custom-tuning-error" class="field-error" role="status"></p>
+			</fieldset>
+			<fieldset class="settings-section">
+				<legend>Reference tone</legend>
+				<div class="reference-tone-controls">
+					<label>String <select id="tone-string-select"></select></label>
+					<label>Volume <input id="tone-volume-input" type="range" min="0" max="100" value="35" /></label>
+					<button id="tone-button" class="quiet-button" type="button" aria-pressed="false">Play tone</button>
+				</div>
+				<p class="settings-help">Starts only when pressed. The tone stops when settings close or the page moves to the background.</p>
+			</fieldset>
+			<div class="settings-actions">
+				<button id="reset-settings-button" class="quiet-button" type="button">Reset settings</button>
+				<button class="primary-button compact" value="close">Done</button>
+			</div>
+		</form>
+	</dialog>
 </body>
 
 </html>
