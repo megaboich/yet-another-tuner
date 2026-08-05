@@ -1,6 +1,6 @@
 /** @import { PitchProcessorMessage, TunerEventHandlers, TunerSession, TunerStartOptions } from './types.js' */
 
-import pitchProcessorUrl from './tuner-pitch-processor.js?url';
+import pitchProcessorUrl from './tuner-pitch-processor.js?worker&url';
 
 /**
  * @param {TunerEventHandlers} handlers
