@@ -84,9 +84,14 @@ The browser requests instrument-friendly microphone processing, such as mono
 input and disabled voice enhancement. Browsers and hardware may not honor every
 preference.
 
-Analysis happens in an `AudioWorklet`, away from page rendering. The graph ends
-in a silent output so the browser keeps processing without playing microphone
-sound through the speakers.
+Analysis happens in an `AudioWorklet`, away from page rendering. An
+`AudioWorklet` is related to Web Workers in that it runs separately from the
+page's UI thread, but it is specifically scheduled by the browser's real-time
+audio system rather than being a general-purpose `Worker`. This keeps pitch
+math from blocking taps, scrolling, settings controls, or drawing the meter.
+
+The graph ends in a silent output so the browser keeps processing without
+playing microphone sound through the speakers.
 
 ```mermaid
 flowchart LR
@@ -96,8 +101,10 @@ flowchart LR
     W -. frequency, clarity, level .-> U[Main-thread tuner logic]
 ```
 
-Only numeric analysis results cross to the main thread. Audio is not uploaded,
-stored, or included in shareable settings.
+Only a compact estimate (frequency, periodic clarity, and level) crosses to the
+main thread after an analysis window completes. The UI then applies filtering,
+target selection, and rendering. Raw audio samples do not cross back to the
+page, are not uploaded or stored, and are not included in shareable settings.
 
 ## Overlapping Analysis Windows
 
@@ -266,9 +273,23 @@ restart.
 
 ## Real-Time Performance
 
-AudioWorklet code runs on a real-time audio thread. Unnecessary allocation can
-cause garbage collection and glitches. The detector therefore reuses typed
-buffers instead of copying each window or growing arrays.
+AudioWorklet code runs with real-time deadlines: it must return promptly for
+each small audio block so the browser can keep the audio graph alive. Moving
+the detector out of the UI thread prevents interface stalls, but it does not
+make analysis free. Missing audio deadlines can still cause glitches, so the
+worklet keeps its work predictable.
+
+The detector uses fixed-size typed buffers that are created once and reused. A
+mirrored ring buffer exposes the latest analysis window without copying it, and
+preallocated NSDF, energy, and peak buffers avoid growing arrays or per-sample
+objects. Analysis runs only after the initial window is full and then once per
+hop of new samples, rather than repeating the full calculation for every audio
+block. These choices bound allocation and reduce CPU demand while retaining the
+overlap needed for responsive readings.
+
+Messages to the main thread contain only completed numeric estimates. Canvas
+drawing is separately batched with `requestAnimationFrame`, so a burst of audio
+messages cannot force a synchronous redraw for every worklet callback.
 
 The direct time-domain method costs more CPU than an FFT-based detector, but it
 keeps the implementation compact and understandable while meeting the current

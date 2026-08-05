@@ -130,6 +130,16 @@ test('fits the tuner at 320 pixels without horizontal overflow', async ({ page }
 	expect(overflow).toBe(0);
 });
 
+test('keeps the pitch graph visible in a mobile active view', async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.goto('./');
+	await page.getByRole('button', { name: /Start listening/ }).click();
+	await expect(page.getByRole('button', { name: 'Stop microphone' })).toBeEnabled();
+
+	const chartBottom = await page.locator('.tuning-chart').evaluate(chart => chart.getBoundingClientRect().bottom);
+	expect(chartBottom).toBeLessThanOrEqual(844);
+});
+
 test('has no automated accessibility violations before and after start', async ({ page }) => {
 	await page.goto('./');
 	let results = await new AxeBuilder({ page }).analyze();

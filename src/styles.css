@@ -712,6 +712,7 @@ body[data-app-state="unclear-signal"] .signal-dot {
 	}
 
 	.tuner-toolbar {
+		min-height: 2.5rem;
 		padding: 0 .2rem;
 	}
 
@@ -720,7 +721,8 @@ body[data-app-state="unclear-signal"] .signal-dot {
 	}
 
 	.note-stats {
-		min-height: 7rem;
+		min-height: 5.5rem;
+		padding-bottom: .6rem;
 	}
 
 	.note-name {
@@ -731,13 +733,43 @@ body[data-app-state="unclear-signal"] .signal-dot {
 		font-size: .68rem;
 	}
 
+	.tuning-indicator {
+		height: 6.5rem;
+		margin-top: 0;
+	}
+
+	.meter-track {
+		top: 2.6rem;
+	}
+
+	.meter-needle {
+		top: 1.8rem;
+		height: 3.5rem;
+	}
+
+	.history-heading {
+		margin-top: .8rem;
+	}
+
+	.tuning-chart {
+		height: 4.5rem;
+	}
+
+	.strings-heading .eyebrow {
+		display: none;
+	}
+
+	.strings-heading h2 {
+		font-size: 1.35rem;
+	}
+
 	.string-selector {
 		gap: .2rem;
-		margin-top: 1.3rem;
+		margin-top: .75rem;
 	}
 
 	.string-selector button {
-		min-height: 7rem;
+		min-height: 5rem;
 		padding: .45rem .1rem;
 	}
 
