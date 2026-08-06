@@ -3,6 +3,28 @@ import AxeBuilder from '@axe-core/playwright';
 
 import { SYNTHETIC_GUITAR_FIXTURES } from './fixtures/synthetic-tones.js';
 
+test('is installable and loads offline after the first visit', async ({ context, page }) => {
+	await page.goto('./');
+	const manifest = await page.locator('link[rel="manifest"]').evaluate(async link => {
+		const response = await fetch(/** @type {HTMLLinkElement} */ (link).href);
+		return response.json();
+	});
+	expect(manifest).toMatchObject({
+		display: 'standalone',
+		name: 'Yet Another Tuner',
+		start_url: './',
+	});
+	expect(manifest.icons).toEqual(expect.arrayContaining([
+		expect.objectContaining({ sizes: '192x192', type: 'image/png' }),
+		expect.objectContaining({ sizes: '512x512', type: 'image/png' }),
+	]));
+
+	await page.evaluate(() => navigator.serviceWorker.ready);
+	await context.setOffline(true);
+	await page.reload();
+	await expect(page.getByRole('button', { name: /Start listening/ })).toBeVisible();
+});
+
 test('starts the production tuner from a project subpath', async ({ page }) => {
 	/** @type {string[]} */
 	const failedResponses = [];

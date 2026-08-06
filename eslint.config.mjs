@@ -70,5 +70,11 @@ export default tslint.config(
 		languageOptions: {
 			globals: globals.audioWorklet,
 		},
+	},
+	{
+		files: ['public/service-worker.js'],
+		languageOptions: {
+			globals: globals.serviceworker,
+		},
 	}
 );

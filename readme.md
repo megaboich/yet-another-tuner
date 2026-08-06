@@ -21,6 +21,7 @@ include microphone identifiers.
 The interface supports system, light, and dark themes.
 The responsive active tuner keeps its pitch meter and history graph visible on
 mobile screens while preserving the full desktop view.
+It can also be installed as a Progressive Web App (PWA).
 
 **Light theme, desktop**
 
@@ -35,6 +36,29 @@ mobile screens while preserving the full desktop view.
 <https://olekboiko.com/yet-another-tuner/>
 
 Microphone access requires HTTPS or local development on `localhost`.
+
+## PWA And Offline Use
+
+Supporting browsers can install the tuner from their address-bar or browser
+menu. The installed app opens in its own standalone window and uses the same
+on-device microphone processing as the website; installation does not add audio
+recording, uploads, telemetry, or a backend.
+
+After one successful online visit, the service worker caches the production app
+shell: the page, styles, JavaScript, pitch-analysis worklet, manifest, and icons.
+Those files are enough to launch and use the tuner without a network connection.
+An initial online load is required to create this cache, and microphone access
+still depends on browser and operating-system permission.
+
+Page navigations check the network first so deployed updates are picked up when
+available, then fall back to the cached page offline. Versioned build assets are
+served from the cache. A new deployment installs a new cache and removes older
+app caches after activation.
+
+Service-worker registration is production-only. This avoids stale caches during
+Vite development and hot reload. Its scope follows Vite's configured base path,
+so a GitHub Pages deployment under `/yet-another-tuner/` cannot intercept
+requests belonging to other applications on the same domain.
 
 ## Requirements
 

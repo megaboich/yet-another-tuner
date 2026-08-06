@@ -5,6 +5,7 @@ import { buildTargets, getConfig, getCustomConfig, isValidCustomTuning } from '.
 import { getElement } from './helpers.js';
 import { createPitchFilter } from './pitch-filter.js';
 import { startReferenceTone } from './reference-tone.js';
+import { registerServiceWorker } from './service-worker-registration.js';
 import {
 	DEFAULT_SETTINGS,
 	loadSettings,
@@ -267,6 +268,7 @@ function getErrorMessage(error) {
 }
 
 function main() {
+	registerServiceWorker();
 	appView = createAppView({
 		onOpenSettings: openSettings,
 		onSelectAuto: selectAutoMode,

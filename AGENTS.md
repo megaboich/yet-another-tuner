@@ -160,7 +160,12 @@ real-device behavior remain manual validation areas.
 - `dist/` is generated; do not edit or commit it.
 - CI runs frozen install, checks, and browser tests.
 - Deployment publishes the static `dist/` artifact.
-- The app intentionally has no service worker or offline/PWA scope.
+- The service worker precaches the production app shell for offline use; it
+  never caches audio or detected pitch data. Navigation is network-first with
+  an offline shell fallback, while content-hashed assets are cache-first. Keep
+  registration production-only to avoid interfering with Vite development and
+  scoped to the configured base path so project-subpath deployments do not
+  control sibling applications.
 
 ## Documentation Policy
 
