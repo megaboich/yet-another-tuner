@@ -75,6 +75,17 @@ describe('MPM pitch detector', () => {
 		expect(Math.abs(getCentsFromFrequency(detector.frequency ?? 1, 196))).toBeLessThan(3);
 	});
 
+	it('rejects strong low-frequency room noise without losing A2', () => {
+		const sampleRate = 48_000;
+		const signal = generateSignal(110, sampleRate);
+		for (let index = 0; index < signal.length; index += 1) {
+			signal[index] += 0.08 * Math.sin(2 * Math.PI * 60 * index / sampleRate);
+		}
+		const detector = detect(signal, sampleRate);
+
+		expect(Math.abs(getCentsFromFrequency(detector.frequency ?? 1, 110))).toBeLessThan(10);
+	});
+
 	it('rejects silence', () => {
 		const detector = detect(new Float32Array(12_000), 48_000);
 

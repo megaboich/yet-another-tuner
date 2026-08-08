@@ -5,7 +5,7 @@ import { getCentsFromFrequency } from './pitch-math.js';
 const DEFAULTS = {
 	fastThresholdCents: 35,
 	maxFrequency: 400,
-	minConfidence: 0.65,
+	minConfidence: 0.6,
 	minFrequency: 55,
 	minRms: 0.001,
 	slowAlpha: 0.25,

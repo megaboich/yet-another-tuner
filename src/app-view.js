@@ -15,7 +15,6 @@ export function createAppView(handlers) {
 	const signalStatus = getElement('#signal-status-text');
 	const welcomeTuning = getElement('#welcome-tuning');
 	const footerSettings = getElement('#footer-settings');
-	const brandMark = getElement('.brand-mark');
 	const stringsTitle = getElement('#strings-title');
 	const settingsButton = getElement('#settings-button');
 
@@ -35,7 +34,6 @@ export function createAppView(handlers) {
 			stringsTitle.textContent = config.name;
 			welcomeTuning.textContent = `${config.name} · ${targets.toReversed().map(target => target.noteName).join(' ')}`;
 			footerSettings.textContent = `A4 = ${settings.referencePitch} Hz · Capo ${settings.capo}`;
-			brandMark.textContent = String(settings.referencePitch);
 		},
 
 		/** @param {TuningMode} mode */

@@ -1,6 +1,6 @@
 {
-	"name": "Yet Another Tuner",
-	"short_name": "Guitar Tuner",
+	"name": "Awesome Tuner",
+	"short_name": "Awesome Tuner",
 	"description": "A fast, private guitar tuner that processes microphone audio on your device.",
 	"id": "./",
 	"start_url": "./",

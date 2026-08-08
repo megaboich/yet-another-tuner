@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-Yet Another Tuner is a static, backend-less guitar tuner deployed to GitHub
+Awesome Tuner is a static, backend-less guitar tuner deployed to GitHub
 Pages. Microphone audio is processed locally with Web Audio and an
 `AudioWorklet`; audio must never be uploaded, recorded, or persisted.
 

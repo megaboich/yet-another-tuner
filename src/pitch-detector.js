@@ -1,10 +1,11 @@
 const DEFAULT_OPTIONS = {
 	hopSize: 512,
+	highPassFrequency: 80,
 	// The real sequence fixture showed that a stricter value could skip the
 	// fundamental during string decay and produce an octave error.
 	keyMaximumThreshold: 0.85,
 	maxFrequency: 400,
-	minConfidence: 0.65,
+	minConfidence: 0.6,
 	minFrequency: 55,
 	minRms: 0.000_5,
 	windowSize: 2_048,
@@ -34,8 +35,10 @@ export class MpmPitchDetector {
 		this.samplesSinceAnalysis = 0;
 		this.previousInput = 0;
 		this.previousOutput = 0;
-		// Remove DC and handling rumble below the useful guitar range.
-		this.highPassCoefficient = Math.exp(-2 * Math.PI * 20 / sampleRate);
+		this.secondPreviousInput = 0;
+		this.secondPreviousOutput = 0;
+		// Attenuate handling, mains, and room rumble before periodicity analysis.
+		this.highPassCoefficient = Math.exp(-2 * Math.PI * this.options.highPassFrequency / sampleRate);
 		this.frequency = null;
 		this.confidence = 0;
 		this.rms = 0;
@@ -49,10 +52,14 @@ export class MpmPitchDetector {
 	push(input) {
 		let analyzed = false;
 		for (const inputSample of input) {
-			const sample = inputSample - this.previousInput
+			const firstPass = inputSample - this.previousInput
 				+ this.highPassCoefficient * this.previousOutput;
 			this.previousInput = inputSample;
-			this.previousOutput = sample;
+			this.previousOutput = firstPass;
+			const sample = firstPass - this.secondPreviousInput
+				+ this.highPassCoefficient * this.secondPreviousOutput;
+			this.secondPreviousInput = firstPass;
+			this.secondPreviousOutput = sample;
 			this.ring[this.writeIndex] = sample;
 			this.ring[this.writeIndex + this.options.windowSize] = sample;
 			this.writeIndex = (this.writeIndex + 1) % this.options.windowSize;

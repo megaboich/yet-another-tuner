@@ -1,4 +1,4 @@
-# Yet Another Guitar Tuner
+# Awesome Tuner
 
 A lightweight browser guitar tuner built with modern JavaScript and the Web
 Audio API. Microphone audio is processed locally in an `AudioWorklet` using a

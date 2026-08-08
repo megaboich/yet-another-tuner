@@ -11,7 +11,7 @@ test('is installable and loads offline after the first visit', async ({ context,
 	});
 	expect(manifest).toMatchObject({
 		display: 'standalone',
-		name: 'Yet Another Tuner',
+		name: 'Awesome Tuner',
 		start_url: './',
 	});
 	expect(manifest.icons).toEqual(expect.arrayContaining([
