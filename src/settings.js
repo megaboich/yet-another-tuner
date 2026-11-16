@@ -102,7 +102,7 @@ function isRecord(value) {
 
 /** @param {unknown} value @returns {value is PresetId} */
 function isPresetId(value) {
-	return value === 'custom' || (typeof value === 'string' && configs.some(config => config.id === value));
+	return value === 'custom' || value === 'chromatic' || (typeof value === 'string' && configs.some(config => config.id === value));
 }
 
 /** @param {unknown} value @returns {value is Theme} */

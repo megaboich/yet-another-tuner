@@ -41,7 +41,9 @@ export async function startTuner(handlers, options = {}) {
 			},
 		});
 		await audioContext.audioWorklet.addModule(pitchProcessorUrl);
-		pitchProcessor = new AudioWorkletNode(audioContext, 'tuner-pitch-processor');
+		pitchProcessor = new AudioWorkletNode(audioContext, 'tuner-pitch-processor', {
+			processorOptions: options.frequencyRange,
+		});
 		const detectorReady = waitForDetector(pitchProcessor, handlers);
 		source = audioContext.createMediaStreamSource(stream);
 		silentOutput = audioContext.createGain();

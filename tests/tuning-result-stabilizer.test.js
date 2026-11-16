@@ -48,4 +48,16 @@ describe('tuning result stabilizer', () => {
 		stabilizer.reset();
 		expect(stabilizer.process(result(4))).toBeNull();
 	});
+
+	it('confirms and keeps chromatic notes without a string index', () => {
+		const stabilizer = createTuningResultStabilizer(2, 3);
+		/** @param {number} note */
+		const chromatic = note => ({ ...result(0), note, stringIndex: null, stringNumber: null });
+		expect(stabilizer.process(chromatic(72))).toBeNull();
+		expect(stabilizer.process(chromatic(72))?.note).toBe(72);
+		expect(stabilizer.process(chromatic(72))?.note).toBe(72);
+		expect(stabilizer.process(chromatic(74))).toBeNull();
+		expect(stabilizer.process(chromatic(74))).toBeNull();
+		expect(stabilizer.process(chromatic(74))?.note).toBe(74);
+	});
 });

@@ -17,6 +17,8 @@ export function createAppView(handlers) {
 	const footerSettings = getElement('#footer-settings');
 	const stringsTitle = getElement('#strings-title');
 	const settingsButton = getElement('#settings-button');
+	const stringsPanel = getElement('#strings-panel');
+	const instrumentGrid = getElement('#instrument-grid');
 
 	startButton.addEventListener('click', handlers.onStart);
 	stopButton.addEventListener('click', handlers.onStop);
@@ -31,9 +33,16 @@ export function createAppView(handlers) {
 		renderSettings(settings, config, targets) {
 			document.documentElement.dataset.theme = settings.theme;
 			document.documentElement.dataset.handedness = settings.handedness;
+			const isChromatic = settings.presetId === 'chromatic';
 			stringsTitle.textContent = config.name;
-			welcomeTuning.textContent = `${config.name} · ${targets.toReversed().map(target => target.noteName).join(' ')}`;
-			footerSettings.textContent = `A4 = ${settings.referencePitch} Hz · Capo ${settings.capo}`;
+			stringsPanel.hidden = isChromatic;
+			instrumentGrid.classList.toggle('is-chromatic', isChromatic);
+			welcomeTuning.textContent = isChromatic
+				? `${config.name} · Any instrument, any note`
+				: `${config.name} · ${targets.toReversed().map(target => target.noteName).join(' ')}`;
+			footerSettings.textContent = isChromatic
+				? `A4 = ${settings.referencePitch} Hz`
+				: `A4 = ${settings.referencePitch} Hz · Capo ${settings.capo}`;
 		},
 
 		/** @param {TuningMode} mode */

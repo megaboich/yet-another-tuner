@@ -4,7 +4,7 @@ export type GuitarConfig = {
 	midiNotes: readonly number[];
 };
 
-export type PresetId = 'standard' | 'drop-d' | 'dadgad' | 'open-g' | 'open-d' | 'half-step-down' | 'full-step-down' | 'custom';
+export type PresetId = 'standard' | 'drop-d' | 'dadgad' | 'open-g' | 'open-d' | 'half-step-down' | 'full-step-down' | 'custom' | 'chromatic';
 export type Theme = 'system' | 'dark' | 'light';
 export type Handedness = 'right' | 'left';
 
@@ -54,8 +54,14 @@ export type TunerSession = {
 	stop(): Promise<void>;
 };
 
+export type FrequencyRange = {
+	minFrequency: number;
+	maxFrequency: number;
+};
+
 export type TunerStartOptions = {
 	deviceId?: string;
+	frequencyRange?: FrequencyRange;
 };
 
 export type TunerEventHandlers = {

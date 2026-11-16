@@ -1,4 +1,4 @@
-/** @import { GuitarConfig, PresetId, TuningTarget } from './types.js' */
+/** @import { FrequencyRange, GuitarConfig, PresetId, TuningTarget } from './types.js' */
 
 import { getStandardFrequency } from './pitch-math.js';
 
@@ -16,6 +16,47 @@ export const configs = [
 ];
 
 export const DEFAULT_CUSTOM_MIDI_NOTES = [64, 59, 55, 50, 45, 40];
+
+export const CHROMATIC_NAME = 'Chromatic';
+
+/** @type {FrequencyRange} */
+export const GUITAR_FREQUENCY_RANGE = Object.freeze({ minFrequency: 55, maxFrequency: 400 });
+
+// Wide enough for instruments such as kalimba, whose keys commonly reach C6–E6
+// and sometimes higher, while staying above the detector's minimum lag limits.
+/** @type {FrequencyRange} */
+export const CHROMATIC_FREQUENCY_RANGE = Object.freeze({ minFrequency: 55, maxFrequency: 2_100 });
+
+const CHROMATIC_TONE_MIDI_RANGE = { first: 36, last: 96 };
+
+/**
+ * @param {PresetId} presetId
+ * @returns {FrequencyRange}
+ */
+export function getFrequencyRange(presetId) {
+	return presetId === 'chromatic' ? CHROMATIC_FREQUENCY_RANGE : GUITAR_FREQUENCY_RANGE;
+}
+
+/**
+ * Reference tone choices for chromatic mode, from C2 to C7.
+ * @param {number} referencePitch
+ * @returns {TuningTarget[]}
+ */
+export function buildChromaticToneTargets(referencePitch) {
+	/** @type {TuningTarget[]} */
+	const targets = [];
+	for (let midiNote = CHROMATIC_TONE_MIDI_RANGE.first; midiNote <= CHROMATIC_TONE_MIDI_RANGE.last; midiNote += 1) {
+		targets.push({
+			frequency: getStandardFrequency(midiNote, referencePitch),
+			midiNote,
+			noteName: NOTE_NAMES[midiNote % 12],
+			octave: Math.floor(midiNote / 12) - 1,
+			stringIndex: targets.length,
+			stringNumber: null,
+		});
+	}
+	return targets;
+}
 
 /**
  * @param {PresetId} presetId

@@ -29,6 +29,8 @@ export function createSettingsView(handlers) {
 	const toneSelect = /** @type {HTMLSelectElement} */ (getElement('#tone-string-select'));
 	const toneVolume = /** @type {HTMLInputElement} */ (getElement('#tone-volume-input'));
 	const toneButton = getElement('#tone-button');
+	const toneLabel = getElement('#tone-select-label');
+	let toneListIsChromatic = false;
 
 	for (let capo = 0; capo <= 12; capo += 1) {
 		capoSelect.add(new Option(capo === 0 ? 'No capo' : `Fret ${capo}`, String(capo)));
@@ -72,6 +74,7 @@ export function createSettingsView(handlers) {
 		render(settings, targets) {
 			setSelectValue(presetSelect, settings.presetId);
 			setSelectValue(capoSelect, String(settings.capo));
+			capoSelect.disabled = settings.presetId === 'chromatic';
 			setSelectValue(themeSelect, settings.theme);
 			setSelectValue(handednessSelect, settings.handedness);
 			setSelectValue(deviceSelect, settings.deviceId);
@@ -82,12 +85,21 @@ export function createSettingsView(handlers) {
 			}
 			referenceInput.value = String(settings.referencePitch);
 			referenceOutput.textContent = `${settings.referencePitch} Hz`;
-			const currentTone = toneSelect.value;
+			const isChromatic = settings.presetId === 'chromatic';
+			const currentTone = isChromatic === toneListIsChromatic ? toneSelect.value : '';
+			toneListIsChromatic = isChromatic;
+			toneLabel.textContent = isChromatic ? 'Note' : 'String';
 			toneSelect.replaceChildren();
 			for (const target of targets) {
-				toneSelect.add(new Option(`String ${target.stringNumber} · ${target.noteName}${target.octave} · ${target.frequency.toFixed(1)} Hz`, String(target.stringIndex)));
+				const stringLabel = target.stringNumber === null ? '' : `String ${target.stringNumber} · `;
+				toneSelect.add(new Option(`${stringLabel}${target.noteName}${target.octave} · ${target.frequency.toFixed(1)} Hz`, String(target.stringIndex)));
 			}
-			toneSelect.value = Array.from(toneSelect.options).some(option => option.value === currentTone) ? currentTone : '5';
+			const defaultTarget = isChromatic
+				? targets.find(target => target.noteName === 'A' && target.octave === 4)
+				: targets[5];
+			toneSelect.value = Array.from(toneSelect.options).some(option => option.value === currentTone)
+				? currentTone
+				: String(defaultTarget?.stringIndex ?? 0);
 		},
 
 		/** @param {MediaDeviceInfo[]} devices @param {string} selectedDeviceId */

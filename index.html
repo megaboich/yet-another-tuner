@@ -60,7 +60,7 @@
 					<button id="stop-button" class="quiet-button" type="button" disabled>Stop microphone</button>
 				</div>
 
-				<div class="instrument-grid">
+				<div id="instrument-grid" class="instrument-grid">
 					<section id="vis-info-panel" class="meter-panel panel" aria-labelledby="meter-title">
 						<div class="meter-heading">
 							<div>
@@ -90,7 +90,7 @@
 						<div id="tuning-chart" class="tuning-chart"></div>
 					</section>
 
-					<aside class="strings-panel panel" aria-labelledby="strings-title">
+					<aside id="strings-panel" class="strings-panel panel" aria-labelledby="strings-title">
 						<div class="strings-heading">
 							<div>
 								<p class="eyebrow">Target string</p>
@@ -129,6 +129,7 @@
 						<option value="open-d">Open D</option><option value="half-step-down">Half step down</option>
 						<option value="full-step-down">Full step down</option>
 						<option value="custom">Custom</option>
+						<option value="chromatic">Chromatic (any instrument)</option>
 					</select>
 				</label>
 				<label><span id="reference-label">A4 reference</span> <output id="reference-output" for="reference-input">440 Hz</output>
@@ -156,7 +157,7 @@
 			<fieldset class="settings-section">
 				<legend>Reference tone</legend>
 				<div class="reference-tone-controls">
-					<label>String <select id="tone-string-select"></select></label>
+					<label><span id="tone-select-label">String</span> <select id="tone-string-select"></select></label>
 					<label>Volume <input id="tone-volume-input" type="range" min="0" max="100" value="35" /></label>
 					<button id="tone-button" class="quiet-button" type="button" aria-pressed="false">Play tone</button>
 				</div>

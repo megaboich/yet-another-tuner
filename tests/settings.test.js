@@ -85,6 +85,14 @@ describe('settings', () => {
 		});
 	});
 
+	it('round-trips chromatic mode through the hash', () => {
+		const hash = serializeSettingsHash({ ...DEFAULT_SETTINGS, presetId: 'chromatic' });
+
+		expect(hash).toBe('#t=chromatic');
+		expect(parseSettingsHash(hash)).toEqual({ presetId: 'chromatic' });
+		expect(normalizeSettings({ presetId: 'chromatic' }).presetId).toBe('chromatic');
+	});
+
 	it('rejects malformed custom tuning hashes', () => {
 		expect(parseSettingsHash('#t=custom&n=64.60.60.50.45.40')).toEqual({ presetId: 'custom' });
 		expect(normalizeSettings({ customMidiNotes: [1, 2] }).customMidiNotes).toEqual(DEFAULT_SETTINGS.customMidiNotes);

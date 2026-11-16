@@ -324,6 +324,10 @@ button:disabled {
 	gap: 1rem;
 }
 
+.instrument-grid.is-chromatic {
+	grid-template-columns: minmax(0, 1fr);
+}
+
 .meter-panel,
 .strings-panel {
 	padding: clamp(1.25rem, 3vw, 2.25rem);
