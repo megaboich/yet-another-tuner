@@ -7,7 +7,7 @@ const DEFAULT_SWITCH_CONFIRMATIONS = 24;
 
 /**
  * Suppress one-frame target changes while preserving live cents updates for
- * the currently stable string.
+ * the currently stable string or chromatic note.
  * @param {number} [requiredConfirmations]
  * @param {number} [switchConfirmations]
  * @returns {TuningResultStabilizer}
@@ -17,39 +17,49 @@ export function createTuningResultStabilizer(
 	switchConfirmations = DEFAULT_SWITCH_CONFIRMATIONS,
 ) {
 	/** @type {number | null} */
-	let stableStringIndex = null;
+	let stableKey = null;
 	/** @type {number | null} */
-	let candidateStringIndex = null;
+	let candidateKey = null;
 	let candidateCount = 0;
 
 	return {
 		process(result) {
-			if (result.stringIndex === stableStringIndex && stableStringIndex !== null) {
-				candidateStringIndex = null;
+			const key = getTargetKey(result);
+			if (key === stableKey) {
+				candidateKey = null;
 				candidateCount = 0;
 				return result;
 			}
 
-			if (result.stringIndex !== candidateStringIndex) {
-				candidateStringIndex = result.stringIndex;
+			if (key !== candidateKey) {
+				candidateKey = key;
 				candidateCount = 1;
 			} else {
 				candidateCount += 1;
 			}
 
-			const confirmationTarget = stableStringIndex === null
+			const confirmationTarget = stableKey === null
 				? requiredConfirmations
 				: switchConfirmations;
 			if (candidateCount < confirmationTarget) return null;
-			stableStringIndex = candidateStringIndex;
-			candidateStringIndex = null;
+			stableKey = candidateKey;
+			candidateKey = null;
 			candidateCount = 0;
 			return result;
 		},
 		reset() {
-			stableStringIndex = null;
-			candidateStringIndex = null;
+			stableKey = null;
+			candidateKey = null;
 			candidateCount = 0;
 		},
 	};
+}
+
+/**
+ * Chromatic results have no string, so the target note identifies them instead.
+ * @param {TunerAPIResponse} result
+ * @returns {number}
+ */
+function getTargetKey(result) {
+	return result.stringIndex ?? -1 - result.note;
 }

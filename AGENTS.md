@@ -112,6 +112,10 @@ that this approach cannot reasonably satisfy.
 The detector targets monophonic guitar input in roughly 55–400 Hz and analyzes
 the first input channel. Harmonic handling is heuristic frequency matching.
 Auto mode chooses the nearest configured target for an accepted pitch.
+The Chromatic tuning preset is for any instrument (for example kalimba): it
+uses a wider detector/filter range from `src/configs.js`, hides string
+selection, and reports the nearest note without harmonic matching. Changing
+between ranges restarts an active microphone session.
 
 See `docs/pitch-analysis.md` for the conceptual algorithm explanation.
 

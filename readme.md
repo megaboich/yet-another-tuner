@@ -14,7 +14,9 @@ diagrammed explanation of the audio-analysis concepts.
 Current controls include standard and alternate tuning presets, A4 calibration,
 capo transposition, manual string locking, input-device selection, themes, and
 left-handed orientation. A validated custom six-string tuning and explicit
-reference-tone generator are also available in Settings. Preferences stay in
+reference-tone generator are also available in Settings. The Chromatic tuning
+option works for any instrument, such as a kalimba: it shows the nearest note
+(for example A2, B2 or F3) and its deviation in cents, with a wider pitch range. Preferences stay in
 local browser storage; shareable musical settings use the URL hash and never
 include microphone identifiers.
 

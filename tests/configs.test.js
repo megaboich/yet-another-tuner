@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildTargets, configs, getConfig, getCustomConfig, isValidCustomTuning } from '../src/configs.js';
+import {
+	buildChromaticToneTargets,
+	buildTargets,
+	CHROMATIC_FREQUENCY_RANGE,
+	configs,
+	getConfig,
+	getCustomConfig,
+	getFrequencyRange,
+	GUITAR_FREQUENCY_RANGE,
+	isValidCustomTuning,
+} from '../src/configs.js';
 
 describe('tuning configurations', () => {
 	it('provides every planned preset with six descending strings', () => {
@@ -36,5 +46,19 @@ describe('tuning configurations', () => {
 		const targets = buildTargets(getCustomConfig([65, 60, 55, 50, 45, 40]), 440, 0);
 
 		expect(targets.map(target => target.noteName)).toEqual(['F', 'C', 'G', 'D', 'A', 'E']);
+	});
+
+	it('uses a wider detector range only for chromatic mode', () => {
+		expect(getFrequencyRange('standard')).toBe(GUITAR_FREQUENCY_RANGE);
+		expect(getFrequencyRange('custom')).toBe(GUITAR_FREQUENCY_RANGE);
+		expect(getFrequencyRange('chromatic')).toBe(CHROMATIC_FREQUENCY_RANGE);
+	});
+
+	it('offers chromatic reference tones from C2 to C7', () => {
+		const tones = buildChromaticToneTargets(440);
+
+		expect(`${tones[0].noteName}${tones[0].octave}`).toBe('C2');
+		expect(`${tones.at(-1)?.noteName}${tones.at(-1)?.octave}`).toBe('C7');
+		expect(tones.find(tone => tone.midiNote === 69)?.frequency).toBe(440);
 	});
 });

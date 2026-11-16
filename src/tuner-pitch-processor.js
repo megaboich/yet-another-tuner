@@ -1,11 +1,15 @@
-/** @import { PitchProcessorMessage, PitchSample } from './types.js' */
+/** @import { FrequencyRange, PitchProcessorMessage, PitchSample } from './types.js' */
 
 import { MpmPitchDetector } from './pitch-detector.js';
 
 class TunerPitchProcessor extends AudioWorkletProcessor {
-	constructor() {
+	/** @param {{ processorOptions?: FrequencyRange }} [options] */
+	constructor(options) {
 		super();
-		this.pitchDetector = new MpmPitchDetector(sampleRate);
+		const range = options?.processorOptions;
+		this.pitchDetector = new MpmPitchDetector(sampleRate, range
+			? { maxFrequency: range.maxFrequency, minFrequency: range.minFrequency }
+			: {});
 		/** @type {PitchProcessorMessage} */
 		const message = { type: 'ready' };
 		this.port.postMessage(message);

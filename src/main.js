@@ -1,7 +1,15 @@
-/** @import { AppSettings, AppState, PitchFilter, PitchSample, ReferenceTone, TuningMode, TuningResultStabilizer, TuningTarget } from './types.js' */
+/** @import { AppSettings, AppState, FrequencyRange, GuitarConfig, PitchFilter, PitchSample, ReferenceTone, TuningMode, TuningResultStabilizer, TuningTarget } from './types.js' */
 
 import { createAppView } from './app-view.js';
-import { buildTargets, getConfig, getCustomConfig, isValidCustomTuning } from './configs.js';
+import {
+	buildChromaticToneTargets,
+	buildTargets,
+	CHROMATIC_NAME,
+	getConfig,
+	getCustomConfig,
+	getFrequencyRange,
+	isValidCustomTuning,
+} from './configs.js';
 import { getElement } from './helpers.js';
 import { createPitchFilter } from './pitch-filter.js';
 import { startReferenceTone } from './reference-tone.js';
@@ -40,6 +48,10 @@ let manualStringIndex = null;
 let settings = DEFAULT_SETTINGS;
 /** @type {TuningTarget[]} */
 let targets = [];
+/** @type {TuningTarget[]} */
+let toneTargets = [];
+/** @type {FrequencyRange | null} */
+let sessionFrequencyRange = null;
 /** @type {PitchFilter | null} */
 let activeFilter = null;
 /** @type {TuningResultStabilizer | null} */
@@ -59,10 +71,12 @@ function setupApp() {
 async function startListening() {
 	if (sessionController.running) return;
 	appView.renderState('requesting');
-	const handlers = { onError: handleRuntimeError, onSample: createPitchHandler() };
+	const frequencyRange = getFrequencyRange(settings.presetId);
+	const handlers = { onError: handleRuntimeError, onSample: createPitchHandler(frequencyRange) };
 
 	try {
-		const session = await sessionController.start(handlers, { deviceId: settings.deviceId });
+		const session = await sessionController.start(handlers, { deviceId: settings.deviceId, frequencyRange });
+		sessionFrequencyRange = frequencyRange;
 		if (!session) return;
 		if (document.hidden) {
 			await sessionController.stop();
@@ -78,10 +92,11 @@ async function startListening() {
 	}
 }
 
-function createPitchHandler() {
+/** @param {FrequencyRange} frequencyRange */
+function createPitchHandler(frequencyRange) {
 	/** @type {number | null} */
 	let previousStringIndex = null;
-	const pitchFilter = createPitchFilter();
+	const pitchFilter = createPitchFilter(frequencyRange);
 	activeFilter = pitchFilter;
 	const resultStabilizer = createTuningResultStabilizer();
 	activeResultStabilizer = resultStabilizer;
@@ -123,12 +138,14 @@ function createPitchHandler() {
 }
 
 function applySettings(updateUrl = true) {
-	const config = settings.presetId === 'custom'
-		? getCustomConfig(settings.customMidiNotes)
-		: getConfig(settings.presetId);
-	targets = buildTargets(config, settings.referencePitch, settings.capo);
+	const isChromatic = settings.presetId === 'chromatic';
+	const config = getTuningConfig();
+	targets = isChromatic ? [] : buildTargets(config, settings.referencePitch, settings.capo);
+	toneTargets = isChromatic ? buildChromaticToneTargets(settings.referencePitch) : targets;
+	if (isChromatic) setTuningMode('chromatic', null);
+	else if (tuningMode === 'chromatic') setTuningMode('auto', null);
 	appView.renderSettings(settings, config, targets);
-	settingsView.render(settings, targets);
+	settingsView.render(settings, toneTargets);
 	headstockView.renderTargets(targets);
 	headstockView.setHandedness(settings.handedness);
 	activeFilter?.reset();
@@ -137,6 +154,20 @@ function applySettings(updateUrl = true) {
 	saveSettings(localStorage, settings);
 	if (updateUrl) history.replaceState(null, '', `${location.pathname}${location.search}${serializeSettingsHash(settings)}`);
 	restartReferenceToneIfPlaying();
+	restartListeningIfRangeChanged();
+}
+
+/** @returns {GuitarConfig} */
+function getTuningConfig() {
+	if (settings.presetId === 'chromatic') return { id: 'chromatic', name: CHROMATIC_NAME, midiNotes: [] };
+	if (settings.presetId === 'custom') return getCustomConfig(settings.customMidiNotes);
+	return getConfig(settings.presetId);
+}
+
+async function restartListeningIfRangeChanged() {
+	if (!sessionController.active || sessionFrequencyRange === getFrequencyRange(settings.presetId)) return;
+	await stopListening('stopped');
+	await startListening();
 }
 
 /** @param {Partial<AppSettings>} changes @param {boolean} [updateUrl] */
@@ -172,7 +203,7 @@ async function toggleReferenceTone() {
 		return;
 	}
 	const { stringIndex, volume } = settingsView.getToneSelection();
-	const target = targets[stringIndex];
+	const target = toneTargets[stringIndex];
 	if (!target) return;
 	activeReferenceTone = await startReferenceTone(target.frequency, volume);
 	settingsView.renderToneState(true);
@@ -206,16 +237,20 @@ async function changeDevice(deviceId) {
 
 /** @param {number} stringIndex */
 function selectManualString(stringIndex) {
-	tuningMode = 'manual';
-	manualStringIndex = stringIndex;
-	headstockView.select(stringIndex);
-	appView.renderMode(tuningMode);
+	if (tuningMode === 'chromatic') return;
+	setTuningMode('manual', stringIndex);
 }
 
 function selectAutoMode() {
-	tuningMode = 'auto';
-	manualStringIndex = null;
-	headstockView.select(null);
+	if (tuningMode === 'chromatic') return;
+	setTuningMode('auto', null);
+}
+
+/** @param {TuningMode} mode @param {number | null} stringIndex */
+function setTuningMode(mode, stringIndex) {
+	tuningMode = mode;
+	manualStringIndex = stringIndex;
+	headstockView.select(stringIndex);
 	appView.renderMode(tuningMode);
 }
 

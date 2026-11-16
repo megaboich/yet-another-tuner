@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { CHROMATIC_FREQUENCY_RANGE } from '../src/configs.js';
 import { MpmPitchDetector } from '../src/pitch-detector.js';
 import { getCentsFromFrequency } from '../src/pitch-math.js';
 import { SYNTHETIC_GUITAR_FIXTURES } from './fixtures/synthetic-tones.js';
@@ -32,9 +33,10 @@ function generateSignal(frequency, sampleRate, options = {}) {
 /**
  * @param {Float32Array} signal
  * @param {number} sampleRate
+ * @param {ConstructorParameters<typeof MpmPitchDetector>[1]} [overrides]
  */
-function detect(signal, sampleRate) {
-	const detector = new MpmPitchDetector(sampleRate);
+function detect(signal, sampleRate, overrides = {}) {
+	const detector = new MpmPitchDetector(sampleRate, overrides);
 	for (let offset = 0; offset < signal.length; offset += 128) {
 		detector.push(signal.subarray(offset, offset + 128));
 	}
@@ -84,6 +86,22 @@ describe('MPM pitch detector', () => {
 		const detector = detect(signal, sampleRate);
 
 		expect(Math.abs(getCentsFromFrequency(detector.frequency ?? 1, 110))).toBeLessThan(10);
+	});
+
+	for (const sampleRate of [44_100, 48_000]) {
+		it(`detects kalimba-range tones in the chromatic range at ${sampleRate} Hz`, () => {
+			// C4, E5, C6, E6 and A6 cover common 17- and 21-key kalimbas.
+			for (const frequency of [261.63, 659.26, 1046.5, 1318.51, 1760]) {
+				const detector = detect(generateSignal(frequency, sampleRate, { harmonics: [1, 0.2] }), sampleRate, CHROMATIC_FREQUENCY_RANGE);
+				expect(Math.abs(getCentsFromFrequency(detector.frequency ?? 1, frequency))).toBeLessThan(2);
+			}
+		});
+	}
+
+	it('keeps the default guitar range limited to low notes', () => {
+		const detector = detect(generateSignal(1046.5, 48_000), 48_000);
+
+		expect(Math.abs(getCentsFromFrequency(detector.frequency ?? 1, 1046.5))).toBeGreaterThan(100);
 	});
 
 	it('rejects silence', () => {

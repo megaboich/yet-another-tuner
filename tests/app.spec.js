@@ -129,6 +129,53 @@ test('detects the six-string synthetic fixture set', async ({ page }) => {
 	}
 });
 
+test('tunes any note, including kalimba-range notes, in chromatic mode', async ({ page }) => {
+	await page.addInitScript(() => {
+		Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+			configurable: true,
+			value: async () => {
+				const context = new AudioContext();
+				const oscillator = context.createOscillator();
+				const gain = context.createGain();
+				const destination = context.createMediaStreamDestination();
+				gain.gain.value = 0.1;
+				oscillator.frequency.value = 1046.5;
+				oscillator.connect(gain).connect(destination);
+				oscillator.start();
+				await context.resume();
+				/** @type {Window & { __testOscillator?: OscillatorNode }} */
+				const testWindow = window;
+				testWindow.__testOscillator = oscillator;
+				return destination.stream;
+			},
+		});
+	});
+	await page.goto('./#t=chromatic');
+	await expect(page.locator('#welcome-tuning')).toContainText('Chromatic');
+	await page.getByRole('button', { name: /Start listening/ }).click();
+
+	await expect(page.locator('#note-name')).toHaveText('C6', { timeout: 10_000 });
+	await expect(page.locator('#strings-panel')).toBeHidden();
+
+	for (const [frequency, note] of /** @type {const} */ ([[1318.51, 'E6'], [174.61, 'F3'], [123.47, 'B2']])) {
+		await page.evaluate(value => {
+			/** @type {Window & { __testOscillator?: OscillatorNode }} */
+			const testWindow = window;
+			testWindow.__testOscillator?.frequency.setValueAtTime(value, 0);
+		}, frequency);
+		await expect(page.locator('#note-name')).toHaveText(note, { timeout: 4_000 });
+	}
+
+	await page.evaluate(() => {
+		/** @type {Window & { __testOscillator?: OscillatorNode }} */
+		const testWindow = window;
+		// C♯4 tuned 20 cents sharp.
+		testWindow.__testOscillator?.frequency.setValueAtTime(277.18 * 2 ** (20 / 1200), 0);
+	});
+	await expect(page.locator('#note-name')).toHaveText('C♯4', { timeout: 4_000 });
+	await expect(page.locator('#cents-value')).toContainText(/\+(19|20|21)\./);
+});
+
 test('supports keyboard string selection and auto mode', async ({ page }) => {
 	await page.goto('./');
 	await page.getByRole('button', { name: /Start listening/ }).click();
